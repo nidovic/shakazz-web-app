@@ -2,7 +2,9 @@ import React, {useRef, useState, useEffect} from "react";
 import { useRouter } from 'next/router';
 import { useForm } from "react-hook-form";
 import { yupResolver } from '@hookform/resolvers/yup';
-import { login } from '../../src/services/auth.service'
+import { loginUser } from '../../src/services/auth.service'
+import {Spinner} from "reactstrap"
+import connfig from '../../src/config';
 // reactstrap components
 import {
   Button,
@@ -19,16 +21,18 @@ import Captcha from "../../src/components/Captcha";
 import { loginSchema } from "../../src/validations";
 import Head from "next/head";
 import config from "../../src/config";
+import {useMutation, useQueryClient} from 'react-query';
 
 
 function Login() {
+  const { mutateAsync, isLoading} = useMutation("Login User",loginUser)
   const router = useRouter();
   const { register, handleSubmit, errors } = useForm({
     resolver: yupResolver(loginSchema),
   });
-  useEffect(()=>{
-    router.push("pre-inscription");
-  })
+  // useEffect(()=>{
+  //   router.push("pre-inscription");
+  // })
   const recaptchaRef = useRef();
   const [show, setShow] = useState(false);
   const [verified, setVerified]= useState(false);
@@ -37,34 +41,37 @@ function Login() {
   const [successmsg, setSuccessmsg]= useState(null);
   const handleToggleshow = () => setShow(!show);
   const executeCaptcha = () => setVerified(!verified);
-  const onSubmit = async (data)  => {
+  const onSubmit = async (hookData)  => {
     
      let userdata;
     if(verified){
-      setSubmitting(true);
-    const { password, userName } = data;
+      setSubmitting(isLoading);
+    const { password, userName } = hookData;
     userdata = {password, userName }
    try{
-       let datares = await login(userdata);
-      
+       let datares = await mutateAsync(userdata);
+       console.log("login", datares);
        const { data, error, success, message } = datares;
        if(error && !success){
         setSuccessmsg(null);
         setErrormsg(message);
        
        } else {
-         setErrormsg(null);
+         if( typeof window !== "undefined"){
+           console.log("window", data.user_token);
+             localStorage.setItem(config.localStoreToken, data.user_token);
+             setErrormsg(null);
          setSuccessmsg(message);
+         setSubmitting(isLoading)
          router.push('/portal/dashboard');
+         }     
        }
        
-       
-
    }catch(err){
         console.log("error", err);
    }
    } else {
-     alert("Vous  n'êtes pas humain")
+     alert("Vous n'êtes pas humain")
    }
   };
   return (
@@ -177,8 +184,8 @@ function Login() {
                   <span className="text-success font-weight-700">{successmsg}</span>
                
               </div> }
-                <Button disabled={true} className="mt-3 mb-1"  type="submit" style={{width:'50%', backgroundColor:'#679966', borderColor:'#679966'}} >
-                  S'identifier
+                <Button className="mt-3 mb-1"  disabled={isLoading} type="submit" style={{width:'50%', backgroundColor:'#679966', borderColor:'#679966'}} >
+                    {isLoading? <Spinner size="sm" color="#cc993a" />: "S'identifier"}  
                 </Button>
                 <div>
                   <a
