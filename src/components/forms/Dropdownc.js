@@ -12,14 +12,16 @@ import {
   Col,
 } from "reactstrap";
 import Image from 'next/image';
-
-function Sdropdown({flag, idDd, sample, phone, label, register, name, handleOnSelect,selectedOption,options}) {
+// f
+function Sdropdown({portefeuille,flag, idDd, sample, phone, label, register, name, handleOnSelect,selectedOption,options}) {
 
   // const [selectedOption, setSelectedOption] = useState(options[Math.floor(Math.random() * options.length )]);
    const [open, setIsOpen] = useState(false);
    const toggle = () => setIsOpen(prevState => !prevState);
+   //setAccount("ugh");
    const onOptionClicked = value => () => {
-    handleOnSelect(value)
+     console.log("heeeeee", value);
+    handleOnSelect(value);
     toggle();
 
   };
@@ -81,13 +83,24 @@ function Sdropdown({flag, idDd, sample, phone, label, register, name, handleOnSe
          {sample && <DropdownMenu  name={name}  aria-labelledby="navbarDropdownMenuLink2">
             {options.map( (option, i) => (
                 <li key={i}>
-                  <DropdownItem  tag="button" onClick={onOptionClicked(option)}>
+                  <DropdownItem  tag="button" onClick={ () => {onOptionClicked(option)
+                  dropdown_toggle.dropdown_toggle(option.val,idDd)}}>
                     {option.val}
                   </DropdownItem>
                 </li>
 
               ))}
         </DropdownMenu>}
+        {portefeuille && <DropdownMenu  name={name}  aria-labelledby="navbarDropdownMenuLink2">
+           {options.map( (option, i) => (
+               <li key={i}>
+                 <DropdownItem  tag="button" onClick={onOptionClicked(option)}>
+                   {option.adresse}
+                 </DropdownItem>
+               </li>
+
+             ))}
+       </DropdownMenu>}
       </UncontrolledDropdown>
     </div>
   );
